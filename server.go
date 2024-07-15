@@ -27,10 +27,12 @@ func main() {
 	// Aplica as migrações do banco de dados
 	database.Migrate(dbConn)
 
-	CategoryDB := database.NewCategory(dbConn)
+	categoryDB := database.NewCategory(dbConn)
+	courseDb := database.NewCourse(dbConn)
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		CategoryDB: CategoryDB,
+		CategoryDB: categoryDB,
+		CourseDB:   courseDb,
 	}}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
