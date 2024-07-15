@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -16,18 +15,19 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	db, err := sql.Open("sqlite3", "./data.db")
-	if err != nil {
-		log.Fatalf("failed to open database: %v", err)
-	}
-	defer db.Close()
-
-	CategoryDB := database.NewCategory(db)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
+
+	dbConn := database.InitDB()
+	defer dbConn.Close()
+
+	// Aplica as migrações do banco de dados
+	database.Migrate(dbConn)
+
+	CategoryDB := database.NewCategory(dbConn)
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		CategoryDB: CategoryDB,
